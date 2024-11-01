@@ -58,27 +58,28 @@ WHERE ST_SRID(geom) = 0;
 
 --zad 6
 --dane załadowane przez shp2pgsql do DHDN.Berlin/Cassini
--- C:\Program Files\PostgreSQL\17\bin>shp2pgsql.exe -s 3068 
+-- C:\Program Files\PostgreSQL\17\bin>shp2pgsql.exe 
 -- "C:\\Users\\xx\bazy danych przestrzennych
 -- \\cwiczenia\\cw3\\Ćwiczenia 3\\Karlsruhe_Germany_Shapefile\\T2019_KAR_GERMANY
 -- \\T2019_KAR_STREET_NODE.shp" street_nodes2019 | psql -h localhost -p 5432 
 -- -U postgres -d BDP3
-UPDATE input_points AS p
-SET geom = ST_SetSRID(geom, 4326);
-SELECT ST_AsText(geom) FROM street_nodes2019 WHERE street_nodes2019.intersect='Y';
-UPDATE street_nodes2019 AS p
-SET geom = ST_SetSRID(geom, 4326);
+UPDATE input_points AS p SET geom = ST_SetSRID(geom, 3068);
+UPDATE input_points SET geom = ST_Transform(geom, 3068);
 
--- DROP TABLE street_nodes2019;
+UPDATE street_nodes2019 SET geom = ST_SetSRID(geom, 3068);
+UPDATE street_nodes2019 SET geom = ST_Transform(geom, 3068);
+
+--DROP TABLE street_nodes2019;
+-- DROP TABLE input_points;
 
 SELECT n.gid, n.node_id
 FROM street_nodes2019 n
 WHERE n.intersect='Y' AND 
-ST_DWithin(n.geom, ST_MakeLine(ARRAY(SELECT p.geom FROM input_points p)), 200);
+ST_DWithin(n.geom, ST_MakeLine(ARRAY(SELECT p.geom FROM input_points p)), 10000);
 
 -- SELECT * FROM street_nodes2019 n WHERE n.intersect='Y';
 -- SELECT ST_SRID(n.geom) FROM street_nodes2019 n;
-SELECT ST_SRID(n.geom) FROM input_points n;
+-- SELECT ST_SRID(n.geom) FROM input_points n;
 
 -- SELECT ST_AsText(ST_MakeLine(ARRAY(SELECT p.geom FROM input_points p)))
 
